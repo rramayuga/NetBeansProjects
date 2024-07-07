@@ -6,7 +6,7 @@ import java.awt.event.ActionEvent;
 public class AdminPanel extends JFrame {
     public AdminPanel() {
         setTitle("Admin Panel");
-        setSize(400, 300);
+        setSize(180, 150);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(null);

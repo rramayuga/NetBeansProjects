@@ -161,3 +161,13 @@ public class AddDiagnosisDialog extends JDialog {
         });
     }
 }
+
+/*
+Doctor's Name
+Reason for consultation
+\\\Date of Diagnosis to Date of Consultation
+Findings to Diagnosis
+DATE FIRST
+Action Needed to Recommendation
+DATES SHOULD HAVE CALENDAR
+*/

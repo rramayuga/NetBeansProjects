@@ -28,7 +28,7 @@ public class ViewPatientDialog extends JDialog {
         model = new DefaultTableModel();
         model.addColumn("Name");
         model.addColumn("Telephone");
-        model.addColumn("Birthday");
+        model.addColumn("Gender");
         model.addColumn("Age");
         model.addColumn("Address");
         model.addColumn("Image Path");
@@ -89,7 +89,7 @@ public class ViewPatientDialog extends JDialog {
         patients = ExcelUtils.getPatientsFromExcel();
         model.setRowCount(0); // Clear existing rows
         for (Patient patient : patients) {
-            Object[] row = {patient.getName(), patient.getTelephone(), patient.getBirthday(),
+            Object[] row = {patient.getName(), patient.getTelephone(), patient.getGender(),
                     patient.getAge(), patient.getAddress(), patient.getImagePath()};
             model.addRow(row);
         }

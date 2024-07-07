@@ -8,7 +8,7 @@ import java.util.List;
 
 public class PatientTableModel extends AbstractTableModel {
     private final List<Patient> patients;
-    private final String[] columnNames = {"Name", "Telephone", "Birthday", "Age", "Address"};
+    private final String[] columnNames = {"Name", "Telephone", "Gender", "Age", "Address"};
 
     public PatientTableModel(List<Patient> patients) {
         this.patients = patients;
@@ -35,7 +35,7 @@ public class PatientTableModel extends AbstractTableModel {
         return switch (columnIndex) {
             case 0 -> patient.getName();
             case 1 -> patient.getTelephone();
-            case 2 -> patient.getBirthday();
+            case 2 -> patient.getGender();
             case 3 -> patient.getAge();
             case 4 -> patient.getAddress();
             default -> null;

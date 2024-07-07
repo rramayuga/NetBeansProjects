@@ -15,13 +15,14 @@ public class ExcelUtils {
             StringBuilder sb = new StringBuilder();
             sb.append(patient.getName()).append(",");
             sb.append(patient.getTelephone()).append(",");
-            sb.append(patient.getBirthday()).append(",");
+            sb.append(patient.getGender()).append(",");
             sb.append(patient.getAge()).append(",");
             sb.append(patient.getAddress()).append(",");
             sb.append(patient.getImagePath()).append("\n");
             writer.write(sb.toString());
             System.out.println("Patient added successfully to CSV.");
         } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -34,15 +35,16 @@ public class ExcelUtils {
                 if (data.length == 6) {
                     String name = data[0].trim();
                     String telephone = data[1].trim();
-                    String birthday = data[2].trim();
+                    String gender = data[2].trim();
                     int age = Integer.parseInt(data[3].trim());
                     String address = data[4].trim();
                     String imagePath = data[5].trim();
-                    Patient patient = new Patient(name, telephone, birthday, age, address, imagePath);
+                    Patient patient = new Patient(name, telephone, gender, age, address, imagePath);
                     patients.add(patient);
                 }
             }
         } catch (IOException | NumberFormatException e) {
+            e.printStackTrace();
         }
         return patients;
     }
@@ -55,7 +57,7 @@ public class ExcelUtils {
                     // Update patient information with new data
                     writer.write(updatedPatient.getName() + ",");
                     writer.write(updatedPatient.getTelephone() + ",");
-                    writer.write(updatedPatient.getBirthday() + ",");
+                    writer.write(updatedPatient.getGender() + ",");
                     writer.write(updatedPatient.getAge() + ",");
                     writer.write(updatedPatient.getAddress() + ",");
                     writer.write(updatedPatient.getImagePath() + "\n");
@@ -63,7 +65,7 @@ public class ExcelUtils {
                     // Write existing patient data if not updated
                     writer.write(patient.getName() + ",");
                     writer.write(patient.getTelephone() + ",");
-                    writer.write(patient.getBirthday() + ",");
+                    writer.write(patient.getGender() + ",");
                     writer.write(patient.getAge() + ",");
                     writer.write(patient.getAddress() + ",");
                     writer.write(patient.getImagePath() + "\n");
@@ -71,8 +73,10 @@ public class ExcelUtils {
             }
             System.out.println("Patient updated successfully in CSV.");
         } catch (IOException e) {
+            e.printStackTrace();
         }
     }
+
     public static void deletePatientFromExcel(String patientName) {
         List<Patient> patients = getPatientsFromExcel();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH))) {
@@ -81,7 +85,7 @@ public class ExcelUtils {
                     // Write existing patient data except the one to be deleted
                     writer.write(patient.getName() + ",");
                     writer.write(patient.getTelephone() + ",");
-                    writer.write(patient.getBirthday() + ",");
+                    writer.write(patient.getGender() + ",");
                     writer.write(patient.getAge() + ",");
                     writer.write(patient.getAddress() + ",");
                     writer.write(patient.getImagePath() + "\n");
@@ -89,6 +93,7 @@ public class ExcelUtils {
             }
             System.out.println("Patient deleted successfully from CSV.");
         } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

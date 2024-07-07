@@ -6,7 +6,7 @@ package clinic.system;
 public class Patient {
     private String name;
     private String telephone;
-    private String birthday;
+    private String gender;
     private int age;
     private String address;
     private String imagePath;
@@ -14,7 +14,7 @@ public class Patient {
     public Patient(String name, String telephone, String birthday, int age, String address, String imagePath) {
         this.name = name;
         this.telephone = telephone;
-        this.birthday = birthday;
+        this.gender = gender;
         this.age = age;
         this.address = address;
         this.imagePath = imagePath;
@@ -27,8 +27,8 @@ public class Patient {
     public String getTelephone() { return telephone; }
     public void setTelephone(String telephone) { this.telephone = telephone; }
 
-    public String getBirthday() { return birthday; }
-    public void setBirthday(String birthday) { this.birthday = birthday; }
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
 
     public int getAge() { return age; }
     public void setAge(int age) { this.age = age; }

@@ -4,19 +4,22 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.awt.print.*;
+import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 public class AddDiagnosisDialog extends JDialog {
     private JComboBox<String> patientNameComboBox;
+    private JTextField doctorNameField;
+    private JTextField reasonForConsultationField;
+    private JSpinner diagnosisDateSpinner;
     private JTextField findingsField;
-    private JTextField dateField;
-    private JTextField actionNeededField;
+    private JTextField recommendationField;
 
     // List to hold patient names
     private List<String> patientNames = new ArrayList<>();
@@ -28,36 +31,53 @@ public class AddDiagnosisDialog extends JDialog {
     }
 
     private void initializeUI() {
-        JPanel panel = new JPanel(new GridLayout(5, 2, 10, 10));
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        panel.add(new JLabel("Patient Name:"));
+        JPanel formPanel = new JPanel(new GridLayout(7, 2, 10, 10)); // Adjusted rows for form fields
+        formPanel.add(new JLabel("Patient Name:"));
         patientNameComboBox = new JComboBox<>();
-        panel.add(patientNameComboBox);
+        patientNameComboBox.setEditable(true);
+        formPanel.add(patientNameComboBox);
 
-        panel.add(new JLabel("Findings:"));
+        formPanel.add(new JLabel("Doctor's Name:"));
+        doctorNameField = new JTextField();
+        formPanel.add(doctorNameField);
+
+        formPanel.add(new JLabel("Reason for Consultation:"));
+        reasonForConsultationField = new JTextField();
+        formPanel.add(reasonForConsultationField);
+
+        formPanel.add(new JLabel("Date of Diagnosis:"));
+        diagnosisDateSpinner = new JSpinner(new SpinnerDateModel());
+        JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(diagnosisDateSpinner, "yyyy-MM-dd");
+        diagnosisDateSpinner.setEditor(dateEditor);
+        formPanel.add(diagnosisDateSpinner);
+
+        formPanel.add(new JLabel("Diagnosis:"));
         findingsField = new JTextField();
-        panel.add(findingsField);
+        formPanel.add(findingsField);
 
-        panel.add(new JLabel("Date of Diagnosis:"));
-        dateField = new JTextField();
-        panel.add(dateField);
+        formPanel.add(new JLabel("Recommendation:"));
+        recommendationField = new JTextField();
+        formPanel.add(recommendationField);
 
-        panel.add(new JLabel("Action Needed:"));
-        actionNeededField = new JTextField();
-        panel.add(actionNeededField);
+        panel.add(formPanel, BorderLayout.CENTER);
 
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton addButton = new JButton("Add Diagnosis");
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                System.out.println("Add Button Clicked");
                 String patientName = (String) patientNameComboBox.getSelectedItem();
+                String doctorName = doctorNameField.getText();
+                String reasonForConsultation = reasonForConsultationField.getText();
+                String diagnosisDate = new SimpleDateFormat("yyyy-MM-dd").format(diagnosisDateSpinner.getValue());
                 String findings = findingsField.getText();
-                String date = dateField.getText();
-                String actionNeeded = actionNeededField.getText();
+                String recommendation = recommendationField.getText();
 
-                // Example: Save diagnosis information to database or file
-                // DiagnosisUtils.addDiagnosis(patientName, findings, date, actionNeeded);
+                saveDiagnosisToCSV("diagnosis.csv", patientName, doctorName, reasonForConsultation, diagnosisDate, findings, recommendation);
 
                 JOptionPane.showMessageDialog(AddDiagnosisDialog.this,
                         "Diagnosis added successfully!",
@@ -71,12 +91,25 @@ public class AddDiagnosisDialog extends JDialog {
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                System.out.println("Cancel Button Clicked");
                 dispose();
             }
         });
 
-        panel.add(addButton);
-        panel.add(cancelButton);
+        JButton printButton = new JButton("Print");
+        printButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Print Button Clicked");
+                printPatientInfo();
+            }
+        });
+
+        buttonPanel.add(addButton);
+        buttonPanel.add(cancelButton);
+        buttonPanel.add(printButton);
+
+        panel.add(buttonPanel, BorderLayout.SOUTH);
 
         getContentPane().add(panel);
         pack();
@@ -129,23 +162,85 @@ public class AddDiagnosisDialog extends JDialog {
     }
 
     private void filterPatientNames(String filter) {
-        DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) patientNameComboBox.getModel();
-        model.removeAllElements();
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) patientNameComboBox.getModel();
+                model.removeAllElements();
 
-        for (String name : patientNames) {
-            if (name.toLowerCase().contains(filter.toLowerCase())) {
-                model.addElement(name);
+                for (String name : patientNames) {
+                    if (name.toLowerCase().contains(filter.toLowerCase())) {
+                        model.addElement(name);
+                    }
+                }
+
+                patientNameComboBox.setModel(model);
+                patientNameComboBox.setPopupVisible(model.getSize() > 0);
             }
-        }
-
-        patientNameComboBox.setModel(model);
-        patientNameComboBox.setPopupVisible(model.getSize() > 0);
+        });
     }
 
     private void clearFields() {
+        doctorNameField.setText("");
+        reasonForConsultationField.setText("");
+        diagnosisDateSpinner.setValue(new Date());
         findingsField.setText("");
-        dateField.setText("");
-        actionNeededField.setText("");
+        recommendationField.setText("");
+    }
+
+    private void saveDiagnosisToCSV(String csvFilePath, String patientName, String doctorName, String reasonForConsultation, String diagnosisDate, String findings, String recommendation) {
+        try (FileWriter writer = new FileWriter(csvFilePath, true);
+             BufferedWriter bw = new BufferedWriter(writer);
+             PrintWriter out = new PrintWriter(bw)) {
+            out.println(patientName + "," + doctorName + "," + reasonForConsultation + "," + diagnosisDate + "," + findings + "," + recommendation);
+        } catch (IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Error saving diagnosis to CSV file: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void printPatientInfo() {
+        String patientName = (String) patientNameComboBox.getSelectedItem();
+        String doctorName = doctorNameField.getText();
+        String reasonForConsultation = reasonForConsultationField.getText();
+        String diagnosisDate = new SimpleDateFormat("yyyy-MM-dd").format(diagnosisDateSpinner.getValue());
+        String findings = findingsField.getText();
+        String recommendation = recommendationField.getText();
+
+        PrinterJob printerJob = PrinterJob.getPrinterJob();
+        printerJob.setPrintable(new Printable() {
+            @Override
+            public int print(Graphics g, PageFormat pageFormat, int pageIndex) throws PrinterException {
+                if (pageIndex > 0) {
+                    return NO_SUCH_PAGE;
+                }
+
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
+
+                g.drawString("Patient Information", 100, 100);
+                g.drawString("Patient Name: " + patientName, 100, 120);
+                g.drawString("Doctor's Name: " + doctorName, 100, 140);
+                g.drawString("Reason for Consultation: " + reasonForConsultation, 100, 160);
+                g.drawString("Date of Diagnosis: " + diagnosisDate, 100, 180);
+                g.drawString("Diagnosis: " + findings, 100, 200);
+                g.drawString("Recommendation: " + recommendation, 100, 220);
+
+                return PAGE_EXISTS;
+            }
+        });
+
+        boolean doPrint = printerJob.printDialog();
+        if (doPrint) {
+            try {
+                printerJob.print();
+            } catch (PrinterException e) {
+                JOptionPane.showMessageDialog(this, "Print Error: " + e.getMessage(),
+                        "Print Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     public static void main(String[] args) {
@@ -161,13 +256,3 @@ public class AddDiagnosisDialog extends JDialog {
         });
     }
 }
-
-/*
-Doctor's Name
-Reason for consultation
-\\\Date of Diagnosis to Date of Consultation
-Findings to Diagnosis
-DATE FIRST
-Action Needed to Recommendation
-DATES SHOULD HAVE CALENDAR
-*/

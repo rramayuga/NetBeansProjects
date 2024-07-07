@@ -10,7 +10,8 @@ import java.awt.event.ActionListener;
 import java.io.File;
 
 public class AddPatientDialog extends JDialog {
-    private JTextField nameField, telephoneField, birthdayField, ageField, addressField;
+    private JTextField nameField, telephoneField, ageField, addressField;
+    private JComboBox<String> genderComboBox;
     private JLabel imageLabel;
     private String imagePath;
 
@@ -41,14 +42,14 @@ public class AddPatientDialog extends JDialog {
         gbc.gridx = 1;
         add(telephoneField, gbc);
 
-        JLabel birthdayLabel = new JLabel("Birthday:");
+        JLabel genderLabel = new JLabel("Gender:");
         gbc.gridx = 0;
         gbc.gridy = 2;
-        add(birthdayLabel, gbc);
+        add(genderLabel, gbc);
 
-        birthdayField = new JTextField(20);
+        genderComboBox = new JComboBox<>(new String[]{"Male", "Female", "Other"});
         gbc.gridx = 1;
-        add(birthdayField, gbc);
+        add(genderComboBox, gbc);
 
         JLabel ageLabel = new JLabel("Age:");
         gbc.gridx = 0;
@@ -100,21 +101,21 @@ public class AddPatientDialog extends JDialog {
         });
 
         addButton.addActionListener((ActionEvent e) -> {
-            String name1 = nameField.getText().trim();
+            String name = nameField.getText().trim();
             String telephone = telephoneField.getText().trim();
-            String birthday = birthdayField.getText().trim();
+            String gender = (String) genderComboBox.getSelectedItem();
             String ageText = ageField.getText().trim();
             String address = addressField.getText().trim();
-            if (name1.isEmpty() || telephone.isEmpty() || birthday.isEmpty() || ageText.isEmpty() || address.isEmpty() || imagePath == null) {
+            if (name.isEmpty() || telephone.isEmpty() || gender == null || ageText.isEmpty() || address.isEmpty() || imagePath == null) {
                 JOptionPane.showMessageDialog(null, "Please fill in all fields");
             } else {
                 try {
                     int age = Integer.parseInt(ageText);
-                    Patient patient = new Patient(name1, telephone, birthday, age, address, imagePath);
+                    Patient patient = new Patient(name, telephone, gender, age, address, imagePath);
                     ExcelUtils.addPatientToExcel(patient);
                     JOptionPane.showMessageDialog(null, "Patient added successfully");
                     dispose();
-                }catch (NumberFormatException ex) {
+                } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(null, "Please enter a valid age");
                 }
             }
